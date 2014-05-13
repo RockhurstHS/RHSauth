@@ -19,36 +19,10 @@ namespace ADHelper {
 
             //ChangePW();
         }
-        private static DirectoryEntry GetDirectoryObject() {
-            DirectoryEntry oDE;
-            oDE = new DirectoryEntry("LDAP://artists.com", "supervisor", "R0ck753!", AuthenticationTypes.Secure);
-            return oDE;
-        }
-        private static DirectoryEntry GetUser(string UserName) {
-            DirectoryEntry de = GetDirectoryObject();
-            DirectorySearcher deSearch = new DirectorySearcher();
-            deSearch.SearchRoot = de;
-
-            deSearch.Filter = "(&(objectClass=user)(SAMAccountName=" + UserName + "))";
-            deSearch.SearchScope = SearchScope.Subtree;
-            SearchResult results = deSearch.FindOne();
-
-            if (!(results == null)) {
-                de = new DirectoryEntry(results.Path, "supervisor", "R0ck753!", AuthenticationTypes.Secure);
-                return de;
-            } else {
-                return null;
-            }
-        }
-        //LDAP://artists.com/CN=Miles Hammonds,CN=Users,DC=artists,DC=com
-        private static void ChangePW() {
-            DirectoryEntry oDE;
-            oDE = new DirectoryEntry("LDAP://artists.com/CN=Miles Hammonds,CN=Users,DC=artists,DC=com", "supervisor", "R0ck753!", AuthenticationTypes.Secure);
-
+        private static void ChangePW(DirectoryEntry entry) {
             try {
                 // Change the password.
-                oDE.Invoke("ChangePassword", new object[] { ".Winter2012", "@school15" });
-                Console.WriteLine("Supposedly it worked.");
+                entry.Invoke("ChangePassword", new object[] { "old", "new" });
             } catch (Exception excep) {
                 Console.WriteLine("Error changing password. Reason: " + excep.Message + "\n" + excep.InnerException);
             }
