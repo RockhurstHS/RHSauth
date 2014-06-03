@@ -11,17 +11,40 @@ namespace ADHelper.Tasks {
         private string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789";
         private ADClasses.AD_UsersCollection users;
         private StreamWriter writer;
+        private string uniformPassword = String.Empty;
 
         public Task_GeneratePasswords(ADClasses.AD_UsersCollection users, int length) {
             this.length = length;
             this.users = users;
         }
-
+        /// <summary>
+        /// Sets a uniform password on all AD distinguishedName properties passed in users collection.
+        /// </summary>
+        /// <example>
+        /// //the 8 is erroneous. sets all passwords to @school1
+        /// Tasks.Task_GeneratePasswords task = new Tasks.Task_GeneratePasswords(users, 8, "@school1");</example>
+        /// <param name="users"></param>
+        /// <param name="length"></param>
+        /// <param name="password"></param>
+        public Task_GeneratePasswords(ADClasses.AD_UsersCollection users, int length, string password) {
+            this.length = length;
+            this.users = users;
+            this.uniformPassword = password;
+        }
+        /// <summary>
+        /// invokes a SetPassword for each user in ad_userscollection object
+        /// output: user_passwords.csv in bin folder
+        /// </summary>
         public void Run() {
-            writer = new StreamWriter("student_passwords.csv", true);
+            writer = new StreamWriter("user_passwords.csv", true);
             foreach (DirectoryEntry user in users.Users) {
                 Console.WriteLine(user.Path);
-                string newPassword = GenerateSinglePassword(length);
+                string newPassword;
+                if(uniformPassword == String.Empty) { // a uniform password was not provided
+                    newPassword = GenerateSinglePassword(length);
+                } else {
+                    newPassword = uniformPassword;
+                }
                 user.Invoke("SetPassword", new object[] { newPassword });
                 writer.WriteLine(user.Path + "," + newPassword);
             }
@@ -51,6 +74,16 @@ namespace ADHelper.Tasks {
                 builder.Append(chars[random.Next(0, chars.Length)]);
             }
             return builder.ToString();
+        }
+        //hard coded way to call a password change based on user provided password.
+        //hard-coded to set as "old" and "new"
+        private static void ChangePW(DirectoryEntry entry) {
+            try {
+                // Change the password.
+                entry.Invoke("ChangePassword", new object[] { "old", "new" });
+            } catch (Exception excep) {
+                Console.WriteLine("Error changing password. Reason: " + excep.Message + "\n" + excep.InnerException);
+            }
         }
     }
 }
