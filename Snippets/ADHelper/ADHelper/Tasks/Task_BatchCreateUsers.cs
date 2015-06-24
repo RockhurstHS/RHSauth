@@ -10,6 +10,7 @@ namespace ADHelper.Tasks {
 
 		bool hasHeaders;
 		string pathToUserCsv;
+		private List<string> badSamAccountNames = new List<string>();
 
 		public Task_BatchCreateUsers(string pathToUserCsv, bool hasHeaders) {
 			this.hasHeaders = hasHeaders;
@@ -41,19 +42,38 @@ namespace ADHelper.Tasks {
 					string password = columns[8];
 
 					try {
-						DirectoryEntry directory = new DirectoryEntry("LDAP://OU=2019,OU=Highly Managed,OU=Users,OU=Student.Greenlease,DC=student,DC=rockhurst,DC=int");
-						DirectoryEntry user = directory.Children.Add("CN=" + samAccountName, "user");
-						user.CommitChanges();
-						directory.CommitChanges();
-						user.Invoke("SetPassword", new object[] { password });
-						user.CommitChanges();
-						Console.WriteLine("Created: " + email);
-					} catch (Exception) {
-						Console.WriteLine("exception when email = " + email);
+						using (var context = new PrincipalContext(ContextType.Domain, "student.rockhurst.int", "OU=2019,OU=Highly Managed,OU=Users,OU=Student.Greenlease,DC=student,DC=rockhurst,DC=int")) {
+							using(var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, samAccountName)) {
+								user.SetPassword(password);
+							}
+
+							/*using (var user = new UserPrincipal(context)) {
+								
+								 new accounts only
+								user.SamAccountName = samAccountName;
+								user.GivenName = fname;
+								user.Surname = lname;
+								user.EmailAddress = email;
+								user.SetPassword(password);
+								user.Enabled = true;
+								user.Save();
+								
+							 }*/
+						}
+						Console.WriteLine("ok: " + email);
+					} catch (Exception ex) {
+						Console.WriteLine("ex when email = " + email);
+						Console.WriteLine(ex.Message);
+						
+						badSamAccountNames.Add(samAccountName);
 					}
 				}
-			} catch (Exception e) {
+			} catch (IOException e) {
 				Console.WriteLine(e.Message);
+			}
+			Console.WriteLine("\n\nfails:");
+			foreach (string s in badSamAccountNames) {
+				Console.WriteLine(s);
 			}
 		}
 	}
