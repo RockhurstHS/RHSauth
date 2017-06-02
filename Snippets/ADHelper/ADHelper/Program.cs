@@ -19,11 +19,11 @@ namespace ADHelper {
 
 			var username = ConfigurationManager.AppSettings["ldap_admin_username"];
 			var password = ConfigurationManager.AppSettings["ldap_admin_password"];
-			var file = ConfigurationManager.AppSettings["ldap_user_file"]; //this files burns the header
+			var file = ConfigurationManager.AppSettings["ldap_user_file"]; //this file burns the header
 
-			//batch create new users from csv, set email property, set password, enable, join hard-coded ou
-			Tasks.Task_BatchCreateUsers task = new Tasks.Task_BatchCreateUsers(file, true);
-			task.Run();
+            //batch create new users from csv, set email property, set password, enable, join hard-coded ou
+            Tasks.Task_BatchCreateUsers task = new Tasks.Task_BatchCreateUsers(file, true);
+            task.Run();
 
 			//ADClasses.AD_UsersCollection users = new ADClasses.AD_UsersCollection(file, true);
 			//Tasks.Task_GeneratePasswords task = new Tasks.Task_GeneratePasswords(users);

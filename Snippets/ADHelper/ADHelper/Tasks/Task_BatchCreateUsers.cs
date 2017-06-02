@@ -4,6 +4,7 @@ using System.Configuration;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ADHelper.Tasks {
 	class Task_BatchCreateUsers {
@@ -41,24 +42,36 @@ namespace ADHelper.Tasks {
 					string email = columns[5];
 					string password = columns[8];
 
-					try {
-						using (var context = new PrincipalContext(ContextType.Domain, "student.rockhurst.int", "OU=2019,OU=Highly Managed,OU=Users,OU=Student.Greenlease,DC=student,DC=rockhurst,DC=int")) {
-							using(var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, samAccountName)) {
+                    // save the domain
+                    //string domain = email.Split('@')[1];
+
+                    // cleaning with regex
+                    string domain = email.Split('@')[1];
+                    string pattern = "[^-ñA-Za-z0-9]";
+                    samAccountName = Regex.Replace(samAccountName, pattern, "");
+                    fname = Regex.Replace(fname, pattern, "");
+                    lname = Regex.Replace(lname, pattern, "");
+
+                    try {
+						using (var context = new PrincipalContext(ContextType.Domain, "student.rockhurst.int", "OU=2021,OU=Highly Managed,OU=Users,OU=Student.Greenlease,DC=student,DC=rockhurst,DC=int")) {
+
+                            /*
+                            // only if setting passwords but not creating accounts
+                            using (var user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, samAccountName)) {
 								user.SetPassword(password);
 							}
+                            */
 
-							/*using (var user = new UserPrincipal(context)) {
-								
-								 new accounts only
-								user.SamAccountName = samAccountName;
-								user.GivenName = fname;
-								user.Surname = lname;
-								user.EmailAddress = email;
+							using (var user = new UserPrincipal(context)) {
+                                // new accounts only
+                                user.SamAccountName = samAccountName;
+                                user.GivenName = fname;
+                                user.Surname = lname;
+                                user.EmailAddress = samAccountName + "@" + domain;
 								user.SetPassword(password);
 								user.Enabled = true;
 								user.Save();
-								
-							 }*/
+							}
 						}
 						Console.WriteLine("ok: " + email);
 					} catch (Exception ex) {
