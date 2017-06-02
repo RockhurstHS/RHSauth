@@ -25,8 +25,11 @@ namespace ADHelper {
             Tasks.Task_BatchCreateUsers task = new Tasks.Task_BatchCreateUsers(file, true);
             task.Run();
 
+            // these don't work? batch password set is done from create users script
+            /*
 			//ADClasses.AD_UsersCollection users = new ADClasses.AD_UsersCollection(file, true);
 			//Tasks.Task_GeneratePasswords task = new Tasks.Task_GeneratePasswords(users);
+            */
 		}
 	}
 }
