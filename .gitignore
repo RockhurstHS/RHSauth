@@ -6,6 +6,9 @@
 #web.debug.config and web.release.config will still commit, so I put dummy passwords there
 web.config
 
+#not sure what this is
+.vs/*
+
 # User-specific files
 *.suo
 *.user
